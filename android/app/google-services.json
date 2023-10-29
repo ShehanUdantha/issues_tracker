@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "860330746114",
+    "project_id": "issues-tracker-bc2a9",
+    "storage_bucket": "issues-tracker-bc2a9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:860330746114:android:e4aae1491f5c855c44e21b",
+        "android_client_info": {
+          "package_name": "com.example.issues_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY7zzEAWkw-DGtTOs236dahB45MuuLzBY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
