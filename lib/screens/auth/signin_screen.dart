@@ -102,15 +102,21 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(
+                  height: AppSizes.spaceBtwSections,
+                ),
 // header section
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Image(
-                      height: 150.0,
+                      height: 100.0,
                       image: AssetImage(
-                        'assets/logos/logo.png',
+                        'assets/logos/logo_empty.png',
                       ),
+                    ),
+                    const SizedBox(
+                      height: AppSizes.md,
                     ),
                     Text(
                       'Welcome back,',

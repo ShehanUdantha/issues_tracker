@@ -11,4 +11,8 @@ class BottomNavigationProvider with ChangeNotifier {
     _pageIndex = newIndex;
     notifyListeners();
   }
+
+  void setDefault() {
+    _pageIndex = 0;
+  }
 }

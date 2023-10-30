@@ -18,4 +18,9 @@ class FilterProvider with ChangeNotifier {
     _selectedPriority = newPriority;
     notifyListeners();
   }
+
+  void setDefault() {
+    _selectedPriority = '';
+    _selectedStatus = '';
+  }
 }

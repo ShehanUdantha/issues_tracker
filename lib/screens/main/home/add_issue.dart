@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:issues_tracker/common/widgets/priority_label.dart';
+import 'package:issues_tracker/helper/helper_function.dart';
 import 'package:issues_tracker/services/issue_methods.dart';
 import 'package:issues_tracker/utils/constants/colors.dart';
 import 'package:issues_tracker/utils/constants/sizes.dart';
@@ -81,7 +82,7 @@ class _AddIssueState extends State<AddIssue> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-// form section            //
+// form section
             Form(
               child: Column(
                 children: [
@@ -129,11 +130,17 @@ class _AddIssueState extends State<AddIssue> {
                   child: PriorityLabel(
                     title: 'Low',
                     bgColor: priority == 'Low'
-                        ? AppColors.selectBg
-                        : AppColors.lowBg,
+                        ? HelperFunction().priorityColor(
+                            'Low',
+                            'bg',
+                          )
+                        : AppColors.selectBg,
                     textColor: priority == 'Low'
-                        ? AppColors.selectText
-                        : AppColors.lowText,
+                        ? HelperFunction().priorityColor(
+                            'Low',
+                            'text',
+                          )
+                        : AppColors.selectText,
                   ),
                 ),
                 const SizedBox(
@@ -148,11 +155,17 @@ class _AddIssueState extends State<AddIssue> {
                   child: PriorityLabel(
                     title: 'Medium',
                     bgColor: priority == 'Medium'
-                        ? AppColors.selectBg
-                        : AppColors.mediumBg,
+                        ? HelperFunction().priorityColor(
+                            'Medium',
+                            'bg',
+                          )
+                        : AppColors.selectBg,
                     textColor: priority == 'Medium'
-                        ? AppColors.selectText
-                        : AppColors.mediumText,
+                        ? HelperFunction().priorityColor(
+                            'Medium',
+                            'text',
+                          )
+                        : AppColors.selectText,
                   ),
                 ),
                 const SizedBox(
@@ -167,11 +180,17 @@ class _AddIssueState extends State<AddIssue> {
                   child: PriorityLabel(
                     title: 'High',
                     bgColor: priority == 'High'
-                        ? AppColors.selectBg
-                        : AppColors.hightBg,
+                        ? HelperFunction().priorityColor(
+                            'High',
+                            'bg',
+                          )
+                        : AppColors.selectBg,
                     textColor: priority == 'High'
-                        ? AppColors.selectText
-                        : AppColors.highText,
+                        ? HelperFunction().priorityColor(
+                            'High',
+                            'text',
+                          )
+                        : AppColors.selectText,
                   ),
                 ),
               ],

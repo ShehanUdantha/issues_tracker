@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers, prefer_typing_uninitialized_variables
+
 import 'package:flutter/material.dart';
 import 'package:issues_tracker/common/widgets/priority_label.dart';
 import 'package:issues_tracker/helper/helper_function.dart';
@@ -38,6 +40,7 @@ class _IssueCardState extends State<IssueCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+//  title
               Expanded(
                 child: Text(
                   _issueModel.title,
@@ -47,6 +50,7 @@ class _IssueCardState extends State<IssueCard> {
                       .apply(fontSizeDelta: 3),
                 ),
               ),
+              // profile picture
               CircleAvatar(
                 radius: 20,
                 backgroundImage: NetworkImage(
@@ -63,39 +67,38 @@ class _IssueCardState extends State<IssueCard> {
             children: [
               Row(
                 children: [
+                  // status label
                   PriorityLabel(
-                    bgColor: _issueModel.status == 'Open'
-                        ? AppColors.hightBg
-                        : _issueModel.status == 'In Progress'
-                            ? AppColors.progBg
-                            : AppColors.selectBg,
-                    textColor: _issueModel.status == 'Open'
-                        ? AppColors.highText
-                        : _issueModel.status == 'In Progress'
-                            ? AppColors.progText
-                            : AppColors.selectText,
                     title: _issueModel.status,
+                    bgColor: HelperFunction().statusColor(
+                      _issueModel.status,
+                      'bg',
+                    ),
+                    textColor: HelperFunction().statusColor(
+                      _issueModel.status,
+                      'text',
+                    ),
                     fontSize: 14.0,
                   ),
                   const SizedBox(
                     width: AppSizes.spaceBtwItems,
                   ),
+// priority label
                   PriorityLabel(
-                    bgColor: _issueModel.priority == 'High'
-                        ? AppColors.hightBg
-                        : _issueModel.priority == 'Medium'
-                            ? AppColors.mediumBg
-                            : AppColors.lowBg,
-                    textColor: _issueModel.priority == 'High'
-                        ? AppColors.highText
-                        : _issueModel.priority == 'Medium'
-                            ? AppColors.mediumText
-                            : AppColors.lowText,
                     title: _issueModel.priority,
+                    bgColor: HelperFunction().priorityColor(
+                      _issueModel.priority,
+                      'bg',
+                    ),
+                    textColor: HelperFunction().priorityColor(
+                      _issueModel.priority,
+                      'text',
+                    ),
                     fontSize: 14.0,
                   ),
                 ],
               ),
+              // posted date
               Text(
                 HelperFunction().formatDate(
                   _issueModel.postedDate,

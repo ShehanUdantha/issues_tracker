@@ -1,3 +1,6 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:issues_tracker/models/user_model.dart';
 import 'package:issues_tracker/providers/user_provider.dart';
@@ -37,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Image(
-              height: 50.0,
+              height: 40.0,
               image: AssetImage(
                 'assets/logos/logo.png',
               ),
@@ -59,7 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [],
+              children: [
+                // create 4 boxes to display the count of the each status
+
+                // create bar chart for status
+              ],
             ),
           ),
         ),

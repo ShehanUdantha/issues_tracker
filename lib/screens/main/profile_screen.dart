@@ -1,10 +1,13 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, no_leading_underscores_for_local_identifiers
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:issues_tracker/helper/helper_function.dart';
 import 'package:issues_tracker/models/user_model.dart';
 import 'package:issues_tracker/providers/user_provider.dart';
 import 'package:issues_tracker/services/auth_methods.dart';
+import 'package:issues_tracker/services/user_methods.dart';
 import 'package:issues_tracker/utils/constants/colors.dart';
 import 'package:issues_tracker/utils/constants/sizes.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +20,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  Uint8List? selectedProfilePic;
+
   void signOutUser(String routeName) async {
     String response = await AuthMethods().signOutMethod();
     if (response == 'Success') {
@@ -24,6 +29,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .pushNamedAndRemoveUntil(routeName, (route) => false);
     } else {
       HelperFunction().showSnackBar(context, response);
+    }
+  }
+
+  void selectProfileImage() async {
+    Uint8List pickedImage = await HelperFunction().pickImage(
+      ImageSource.gallery,
+      context,
+    );
+
+    setState(() {
+      selectedProfilePic = pickedImage;
+    });
+
+    String response = await UserMethods().updateProfileImage(
+      image: pickedImage,
+    );
+
+    if (response == 'Success') {
+      Provider.of<UserProvider>(context, listen: false).refreshUserDetails();
+    } else {
+      HelperFunction().showSnackBar(
+        context,
+        response,
+      );
     }
   }
 
@@ -44,19 +73,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+// user profile picture section
                     Stack(children: [
-                      CircleAvatar(
-                        radius: 64,
-                        backgroundColor: AppColors.grey,
-                        backgroundImage: NetworkImage(
-                          _userModel.userProfile,
-                        ),
-                      ),
+                      selectedProfilePic != null
+                          ? CircleAvatar(
+                              radius: 64,
+                              backgroundColor: AppColors.grey,
+                              backgroundImage: MemoryImage(
+                                selectedProfilePic!,
+                              ),
+                            )
+                          : CircleAvatar(
+                              radius: 64,
+                              backgroundColor: AppColors.grey,
+                              backgroundImage: NetworkImage(
+                                _userModel.userProfile,
+                              ),
+                            ),
                       Positioned(
                         bottom: -10,
                         left: 80,
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: selectProfileImage,
                           icon: const Icon(Icons.add_a_photo),
                         ),
                       ),
@@ -64,16 +102,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(
-                  height: AppSizes.defaultSpace,
+                  height: AppSizes.spaceBtwSections,
                 ),
+
+// user information section
                 Text(
-                  _userModel.fullName,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
+                  'Profile Information',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(
                   height: AppSizes.defaultSpace,
                 ),
+//  user name
+                UserInfoField(
+                  name: 'Name',
+                  info: _userModel.fullName,
+                ),
+                const SizedBox(
+                  height: AppSizes.spaceBtwInputFields,
+                ),
+// user email
+                UserInfoField(
+                  name: 'E-mail',
+                  info: _userModel.emailAddress,
+                ),
+                const SizedBox(
+                  height: AppSizes.spaceBtwInputFields,
+                ),
+// user mobile number
+                UserInfoField(
+                  name: 'Phone Number',
+                  info: _userModel.mobileNumber,
+                ),
+                const SizedBox(
+                  height: AppSizes.spaceBtwItems,
+                ),
+                const Divider(),
+                const SizedBox(
+                  height: AppSizes.spaceBtwSections,
+                ),
+//  forget password button
                 OutlinedButton(
                   onPressed: () => signOutUser('/forget'),
                   child: const Text('Forgot Password'),
@@ -81,6 +149,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(
                   height: AppSizes.defaultSpace,
                 ),
+
+//  sign out button
                 ElevatedButton(
                   onPressed: () => signOutUser('/login'),
                   child: const Text('Sign out'),
@@ -93,6 +163,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class UserInfoField extends StatelessWidget {
+  final String name;
+  final String info;
+  const UserInfoField({
+    super.key,
+    required this.name,
+    required this.info,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          name,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        Text(
+          info,
+          style: Theme.of(context).textTheme.bodyLarge,
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }

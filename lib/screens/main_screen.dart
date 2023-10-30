@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:issues_tracker/providers/bottom_nav_provider.dart';
+import 'package:issues_tracker/providers/filter_provider.dart';
 import 'package:issues_tracker/providers/user_provider.dart';
 import 'package:issues_tracker/screens/main/home_screen.dart';
 import 'package:issues_tracker/screens/main/search_screen.dart';
@@ -25,7 +26,12 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    // refresh user details and add current user details
     Provider.of<UserProvider>(context, listen: false).refreshUserDetails();
+    // set back to home screen
+    Provider.of<BottomNavigationProvider>(context, listen: false).setDefault();
+    // clear all selected filter methods
+    Provider.of<FilterProvider>(context, listen: false).setDefault();
   }
 
   @override

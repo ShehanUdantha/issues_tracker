@@ -1,10 +1,12 @@
-// ignore_for_file: unnecessary_null_comparison
+// ignore_for_file: unnecessary_null_comparison, no_leading_underscores_for_local_identifiers
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:issues_tracker/common/styles/searchbar.dart';
 import 'package:issues_tracker/common/widgets/issue_card.dart';
+import 'package:issues_tracker/models/user_model.dart';
 import 'package:issues_tracker/providers/filter_provider.dart';
+import 'package:issues_tracker/providers/user_provider.dart';
 import 'package:issues_tracker/screens/main/issue_screen.dart';
 import 'package:issues_tracker/utils/constants/constants.dart';
 import 'package:issues_tracker/utils/constants/sizes.dart';
@@ -45,6 +47,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     var query = _fireStore.collection('issues');
+    UserModel _userModel = Provider.of<UserProvider>(context).getUser;
 
     return Consumer<FilterProvider>(
       builder: (context, filterProvider, child) {
@@ -88,6 +91,10 @@ class _SearchScreenState extends State<SearchScreen> {
                             child: FutureBuilder(
                               future: query
                                   .where(
+                                    'ownerId',
+                                    isEqualTo: _userModel.userId,
+                                  )
+                                  .where(
                                     'title',
                                     isGreaterThanOrEqualTo:
                                         _searchController.text,
@@ -108,7 +115,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   itemBuilder: (context, index) {
                                     return GestureDetector(
                                       onTap: () {
-                                        // if user clicked on a issue card it will navigate to issue screen
+// if user clicked on a issue card it will navigate to issue screen
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
                                             builder: (context) => IssueScreen(
@@ -141,10 +148,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             height: AppSizes.defaultSpace,
                           ),
 
-                          // status filter section
-                          Text(
+// status filter section
+                          const Text(
                             'Filter by status',
-                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           Row(
                             children: Constants.statusList
@@ -177,10 +183,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             height: AppSizes.sm,
                           ),
 
-                          // priority filter section
-                          Text(
+// priority filter section
+                          const Text(
                             'Filter by priority',
-                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           Row(
                             children: Constants.priorityList
@@ -215,7 +220,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             height: AppSizes.spaceBtwSections,
                           ),
 
-                          // display all issues
+// display all issues
                           Text(
                             'List of Issues',
                             style: Theme.of(context).textTheme.headlineMedium,
@@ -224,12 +229,16 @@ class _SearchScreenState extends State<SearchScreen> {
                             height: AppSizes.defaultSpace,
                           ),
 
-                          // retrieve all issues from firebase
+// retrieve all issues from firebase
                           Expanded(
-                            child: FutureBuilder(
-                              future: filterProvider.selectedStatus != '' &&
+                            child: StreamBuilder(
+                              stream: filterProvider.selectedStatus != '' &&
                                       filterProvider.selectedPriority != ''
                                   ? query
+                                      .where(
+                                        'ownerId',
+                                        isEqualTo: _userModel.userId,
+                                      )
                                       .where(
                                         'status',
                                         isEqualTo:
@@ -240,30 +249,40 @@ class _SearchScreenState extends State<SearchScreen> {
                                         isEqualTo:
                                             filterProvider.selectedPriority,
                                       )
-                                      .get()
+                                      .snapshots()
                                   : filterProvider.selectedStatus != '' &&
                                           filterProvider.selectedPriority == ''
                                       ? query
+                                          .where(
+                                            'ownerId',
+                                            isEqualTo: _userModel.userId,
+                                          )
                                           .where(
                                             'status',
                                             isEqualTo:
                                                 filterProvider.selectedStatus,
                                           )
-                                          .get()
+                                          .snapshots()
                                       : filterProvider.selectedStatus == '' &&
                                               filterProvider.selectedPriority !=
                                                   ''
                                           ? query
                                               .where(
+                                                'ownerId',
+                                                isEqualTo: _userModel.userId,
+                                              )
+                                              .where(
                                                 'priority',
                                                 isEqualTo: filterProvider
                                                     .selectedPriority,
                                               )
-                                              .get()
+                                              .snapshots()
                                           : query
-                                              .orderBy('postedDate',
-                                                  descending: true)
-                                              .get(),
+                                              .where(
+                                                'ownerId',
+                                                isEqualTo: _userModel.userId,
+                                              )
+                                              .snapshots(),
                               builder: ((context, snapshot) {
                                 if (snapshot.connectionState ==
                                         ConnectionState.none ||
@@ -279,7 +298,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   itemBuilder: (context, index) {
                                     return GestureDetector(
                                       onTap: () {
-                                        // if user clicked on a issue card it will navigate to issue screen
+// if user clicked on a issue card it will navigate to issue screen
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
                                             builder: (context) => IssueScreen(

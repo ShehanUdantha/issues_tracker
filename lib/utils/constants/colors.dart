@@ -27,6 +27,7 @@ class AppColors {
 
   // Card colors
   static const Color cardColor = Color(0xFFFCFCFF);
+  static const Color grisCardColor = Color(0xFFf1f5f9);
 
   // Border colors
   static const Color borderPrimary = Color(0xFFD9D9D9);
