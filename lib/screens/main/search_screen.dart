@@ -90,15 +90,10 @@ class _SearchScreenState extends State<SearchScreen> {
                           Expanded(
                             child: FutureBuilder(
                               future: query
-                                  .where(
-                                    'ownerId',
-                                    isEqualTo: _userModel.userId,
-                                  )
-                                  .where(
-                                    'title',
-                                    isGreaterThanOrEqualTo:
-                                        _searchController.text,
-                                  )
+                                  .where('ownerId',
+                                      isEqualTo: _userModel.userId)
+                                  .where('title',
+                                      isEqualTo: _searchController.text)
                                   .get(),
                               builder: ((context, snapshot) {
                                 if (snapshot.connectionState ==

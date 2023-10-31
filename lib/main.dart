@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:issues_tracker/firebase_options.dart';
 import 'package:issues_tracker/providers/bottom_nav_provider.dart';
 import 'package:issues_tracker/providers/filter_provider.dart';
+import 'package:issues_tracker/providers/network_provider.dart';
+import 'package:issues_tracker/providers/status_provider.dart';
 import 'package:issues_tracker/providers/user_provider.dart';
 import 'package:issues_tracker/screens/auth/forget_password_screen.dart';
 import 'package:issues_tracker/screens/auth/signin_screen.dart';
@@ -36,6 +38,12 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => FilterProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => StatusProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => NetworkProvider(),
         ),
       ],
       child: MaterialApp(

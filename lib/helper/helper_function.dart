@@ -46,13 +46,17 @@ class HelperFunction {
           ? AppColors.hightBg
           : status == 'In Progress'
               ? AppColors.progBg
-              : AppColors.selectBg;
+              : status == 'Closed'
+                  ? AppColors.closeBg
+                  : AppColors.selectBg;
     } else if (type == 'text') {
       return status == 'Open'
           ? AppColors.highText
           : status == 'In Progress'
               ? AppColors.progText
-              : AppColors.selectText;
+              : status == 'Closed'
+                  ? AppColors.closeText
+                  : AppColors.selectText;
     }
   }
 

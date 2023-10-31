@@ -1,11 +1,16 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:issues_tracker/common/widgets/bottom_titles.dart';
 import 'package:issues_tracker/models/bar_model.dart';
+import 'package:issues_tracker/utils/constants/colors.dart';
 
 class BarChartView extends StatelessWidget {
   final int openCount;
   final int progressCount;
   final int closedCount;
+
   const BarChartView({
     super.key,
     required this.openCount,
@@ -15,22 +20,40 @@ class BarChartView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BarModel _barModel = BarModel(
+    BarModel barModel = BarModel(
       openCount: openCount,
       progressCount: progressCount,
       closedCount: closedCount,
     );
-    _barModel.initializedBarData();
+    barModel.initializedBarData();
+
+    double maxY = 50;
 
     return BarChart(
       BarChartData(
-        maxY: 5,
+        maxY: maxY,
         minY: 0,
-        barGroups: _barModel.barData
+        alignment: BarChartAlignment.spaceAround,
+        gridData: const FlGridData(
+          show: false,
+        ),
+        borderData: FlBorderData(
+          show: false,
+        ),
+        titlesData: titlesData,
+        barGroups: barModel.barData
             .map(
               (e) => BarChartGroupData(x: e.x, barRods: [
                 BarChartRodData(
                   toY: e.y.toDouble(),
+                  color: AppColors.primary,
+                  width: 80,
+                  borderRadius: BorderRadius.zero,
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxY,
+                    color: AppColors.selectBg,
+                  ),
                 ),
               ]),
             )
@@ -39,3 +62,20 @@ class BarChartView extends StatelessWidget {
     );
   }
 }
+
+FlTitlesData get titlesData => FlTitlesData(
+      show: true,
+      bottomTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          reservedSize: 30,
+          getTitlesWidget: getBottomTitles,
+        ),
+      ),
+      topTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+      rightTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+    );

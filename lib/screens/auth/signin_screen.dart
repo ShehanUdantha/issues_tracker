@@ -42,11 +42,17 @@ class _SignInScreenState extends State<SignInScreen> {
       String? passwordResponse =
           Validator.validatePassword(_passwordController.text);
       if (passwordResponse == null) {
+        setState(() {
+          isLoading = true;
+        });
         // send user inputs to the firebase function
         String response = await AuthMethods().signInMethod(
           emailAddress: _emailController.text,
           password: _passwordController.text,
         );
+        setState(() {
+          isLoading = false;
+        });
         if (response == 'Success') {
           if (_auth.currentUser!.emailVerified) {
             Navigator.of(context)

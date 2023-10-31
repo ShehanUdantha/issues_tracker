@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:issues_tracker/common/widgets/priority_label.dart';
 import 'package:issues_tracker/helper/helper_function.dart';
 import 'package:issues_tracker/models/user_model.dart';
+import 'package:issues_tracker/providers/network_provider.dart';
+import 'package:issues_tracker/providers/status_provider.dart';
 import 'package:issues_tracker/providers/user_provider.dart';
+import 'package:issues_tracker/screens/network_screen.dart';
 import 'package:issues_tracker/services/issue_methods.dart';
 import 'package:issues_tracker/services/user_methods.dart';
 import 'package:issues_tracker/utils/constants/colors.dart';
@@ -112,6 +115,10 @@ class _IssueScreenState extends State<IssueScreen> {
             isSubmitLoading = false;
           });
 
+          // refresh issue status details when user add new issue
+          Provider.of<StatusProvider>(context, listen: false)
+              .initializedStatus();
+
           if (selectedUser != '0') {
             Navigator.pop(context);
           }
@@ -143,6 +150,8 @@ class _IssueScreenState extends State<IssueScreen> {
     );
 
     if (response == 'Success') {
+      // refresh issue status details when user add new issue
+      Provider.of<StatusProvider>(context, listen: false).initializedStatus();
       Navigator.pop(context);
     } else {
       print(response);
@@ -154,444 +163,454 @@ class _IssueScreenState extends State<IssueScreen> {
     UserModel _userModel = Provider.of<UserProvider>(context).getUser;
     return Scaffold(
       appBar: AppBar(),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(
-                    AppSizes.defaultSpace,
-                  ).copyWith(
-                    top: 0.0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+      body:
+          Consumer<NetworkProvider>(builder: (context, networkProvider, child) {
+        return networkProvider.connectivityResult == 'none'
+            ? const NetworkScreen()
+            : isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : SafeArea(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(
+                          AppSizes.defaultSpace,
+                        ).copyWith(
+                          top: 0.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
 // header section
-                      Row(
-                        children: [
-                          Expanded(
+                            Row(
+                              children: [
+                                Expanded(
 // header title
-                            child: Text(
-                              title,
-                              style: Theme.of(context).textTheme.headlineMedium,
+                                  child: Text(
+                                    title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: AppSizes.sm,
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
+                            const SizedBox(
+                              height: AppSizes.sm,
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
 // current status of the issue
-                          PriorityLabel(
-                            title: status,
-                            bgColor: HelperFunction().statusColor(
-                              status,
-                              'bg',
-                            ),
-                            textColor: HelperFunction().statusColor(
-                              status,
-                              'text',
-                            ),
-                          ),
-                          const SizedBox(
-                            width: AppSizes.md,
-                          ),
+                                PriorityLabel(
+                                  title: status,
+                                  bgColor: HelperFunction().statusColor(
+                                    status,
+                                    'bg',
+                                  ),
+                                  textColor: HelperFunction().statusColor(
+                                    status,
+                                    'text',
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: AppSizes.md,
+                                ),
 // issue posted date
-                          Text(
-                            'Opened on $postedDate',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: AppSizes.spaceBtwSections,
-                      ),
+                                Text(
+                                  'Opened on $postedDate',
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: AppSizes.spaceBtwSections,
+                            ),
 
 // assign section
 //  user can assign their issue to another user
-                      Text(
-                        'Assign to:',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(
-                        height: AppSizes.spaceBtwItems,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StreamBuilder(
+                            Text(
+                              'Assign to:',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(
+                              height: AppSizes.spaceBtwItems,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: StreamBuilder(
 // get all users without current user
-                              stream: _fireStore
-                                  .collection('users')
-                                  .where(
-                                    'userId',
-                                    isNotEqualTo: _userModel.userId,
-                                  )
-                                  .snapshots(),
-                              builder: (context, snapshot) {
+                                    stream: _fireStore
+                                        .collection('users')
+                                        .where(
+                                          'userId',
+                                          isNotEqualTo: _userModel.userId,
+                                        )
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
 // collecting filtered users
-                                List<DropdownMenuItem> usersList = [];
+                                      List<DropdownMenuItem> usersList = [];
 
-                                if (snapshot.connectionState ==
-                                        ConnectionState.none ||
-                                    snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.none ||
+                                          snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
 
-                                if (snapshot.connectionState ==
-                                    ConnectionState.active) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.active) {
 // get all filtered users from firebase
-                                  final users = snapshot.data!.docs.toList();
+                                        final users =
+                                            snapshot.data!.docs.toList();
 
 // first add current user data as a first value to list
 // assign current user value is '0' but other users value is their user id
-                                  usersList.add(
-                                    DropdownMenuItem(
-                                      value: '0',
-                                      child: Row(
-                                        children: [
+                                        usersList.add(
+                                          DropdownMenuItem(
+                                            value: '0',
+                                            child: Row(
+                                              children: [
 //  user profile picture
-                                          CircleAvatar(
-                                            radius: 20,
-                                            backgroundImage: NetworkImage(
-                                              _userModel.userProfile,
+                                                CircleAvatar(
+                                                  radius: 20,
+                                                  backgroundImage: NetworkImage(
+                                                    _userModel.userProfile,
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  width: AppSizes.defaultSpace,
+                                                ),
+// user name
+                                                Text(
+                                                  _userModel.fullName,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge!
+                                                      .apply(
+                                                        fontSizeDelta: 3,
+                                                      ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          const SizedBox(
-                                            width: AppSizes.defaultSpace,
-                                          ),
-// user name
-                                          Text(
-                                            _userModel.fullName,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge!
-                                                .apply(
-                                                  fontSizeDelta: 3,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
+                                        );
 
 // then add all filtered users data to List
-                                  for (var user in users) {
-                                    usersList.add(
-                                      DropdownMenuItem(
-                                        value: user['userId'],
-                                        child: Row(
-                                          children: [
+                                        for (var user in users) {
+                                          usersList.add(
+                                            DropdownMenuItem(
+                                              value: user['userId'],
+                                              child: Row(
+                                                children: [
 //  user profile picture
-                                            CircleAvatar(
-                                              radius: 20,
-                                              backgroundImage: NetworkImage(
-                                                user['userProfile'],
+                                                  CircleAvatar(
+                                                    radius: 20,
+                                                    backgroundImage:
+                                                        NetworkImage(
+                                                      user['userProfile'],
+                                                    ),
+                                                  ),
+                                                  const SizedBox(
+                                                    width:
+                                                        AppSizes.defaultSpace,
+                                                  ),
+//  user name
+                                                  Text(
+                                                    user['fullName'],
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyLarge!
+                                                        .apply(
+                                                          fontSizeDelta: 3,
+                                                        ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            const SizedBox(
-                                              width: AppSizes.defaultSpace,
-                                            ),
-//  user name
-                                            Text(
-                                              user['fullName'],
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyLarge!
-                                                  .apply(
-                                                    fontSizeDelta: 3,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
+                                          );
+                                        }
+                                      }
 // return drop down button with user list
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                    right: AppSizes.sm,
-                                  ),
-                                  child: IgnorePointer(
-                                    ignoring: !isEdit,
-                                    child: DropdownButton(
-                                      value: selectedUser,
-                                      isExpanded: false,
-                                      items: usersList,
-                                      underline: const SizedBox(),
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: AppSizes.sm,
+                                        ),
+                                        child: IgnorePointer(
+                                          ignoring: !isEdit,
+                                          child: DropdownButton(
+                                            value: selectedUser,
+                                            isExpanded: false,
+                                            items: usersList,
+                                            underline: const SizedBox(),
 // if user change assign user, this will change the drop down current value
-                                      onChanged: (value) {
-                                        setState(() {
-                                          selectedUser = value;
-                                          ownerId = selectedUser;
-                                        });
-                                      },
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedUser = value;
+                                                ownerId = selectedUser;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: AppSizes.spaceBtwSections,
+                            ),
+//  form section
+                            Form(
+                              child: Column(
+                                children: [
+// title text field
+                                  TextField(
+                                    controller: _titleController,
+                                    enabled: isEdit,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Title',
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: AppSizes.spaceBtwSections,
-                      ),
-//  form section
-                      Form(
-                        child: Column(
-                          children: [
-// title text field
-                            TextField(
-                              controller: _titleController,
-                              enabled: isEdit,
-                              decoration: const InputDecoration(
-                                hintText: 'Title',
+                                  const SizedBox(
+                                    height: AppSizes.spaceBtwInputFields,
+                                  ),
+// description text field
+                                  TextField(
+                                    controller: _descriptionController,
+                                    enabled: isEdit,
+                                    maxLines: 5,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Description',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(
                               height: AppSizes.spaceBtwInputFields,
                             ),
-// description text field
-                            TextField(
-                              controller: _descriptionController,
-                              enabled: isEdit,
-                              maxLines: 5,
-                              decoration: const InputDecoration(
-                                hintText: 'Description',
+
+// priority level section
+                            Text(
+                              'Priority level:',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(
+                              height: AppSizes.sm,
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    if (isEdit) {
+                                      setState(() {
+                                        priority = 'Low';
+                                      });
+                                    }
+                                  },
+                                  child: PriorityLabel(
+                                    title: 'Low',
+                                    bgColor: priority == 'Low'
+                                        ? HelperFunction().priorityColor(
+                                            'Low',
+                                            'bg',
+                                          )
+                                        : AppColors.selectBg,
+                                    textColor: priority == 'Low'
+                                        ? HelperFunction().priorityColor(
+                                            'Low',
+                                            'text',
+                                          )
+                                        : AppColors.selectText,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: AppSizes.spaceBtwInputFields,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (isEdit) {
+                                      setState(() {
+                                        priority = 'Medium';
+                                      });
+                                    }
+                                  },
+                                  child: PriorityLabel(
+                                    title: 'Medium',
+                                    bgColor: priority == 'Medium'
+                                        ? HelperFunction().priorityColor(
+                                            'Medium',
+                                            'bg',
+                                          )
+                                        : AppColors.selectBg,
+                                    textColor: priority == 'Medium'
+                                        ? HelperFunction().priorityColor(
+                                            'Medium',
+                                            'text',
+                                          )
+                                        : AppColors.selectText,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: AppSizes.spaceBtwInputFields,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (isEdit) {
+                                      setState(() {
+                                        priority = 'High';
+                                      });
+                                    }
+                                  },
+                                  child: PriorityLabel(
+                                    title: 'High',
+                                    bgColor: priority == 'High'
+                                        ? HelperFunction().priorityColor(
+                                            'High',
+                                            'bg',
+                                          )
+                                        : AppColors.selectBg,
+                                    textColor: priority == 'High'
+                                        ? HelperFunction().priorityColor(
+                                            'High',
+                                            'text',
+                                          )
+                                        : AppColors.selectText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: AppSizes.md,
+                            ),
+
+// status section
+                            Text(
+                              'Current status:',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(
+                              height: AppSizes.sm,
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    if (isEdit) {
+                                      setState(() {
+                                        status = 'Open';
+                                      });
+                                    }
+                                  },
+                                  child: PriorityLabel(
+                                    title: 'Open',
+                                    bgColor: status == 'Open'
+                                        ? HelperFunction().statusColor(
+                                            'Open',
+                                            'bg',
+                                          )
+                                        : AppColors.selectBg,
+                                    textColor: status == 'Open'
+                                        ? HelperFunction().statusColor(
+                                            'Open',
+                                            'text',
+                                          )
+                                        : AppColors.selectText,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: AppSizes.spaceBtwInputFields,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (isEdit) {
+                                      setState(() {
+                                        status = 'In Progress';
+                                      });
+                                    }
+                                  },
+                                  child: PriorityLabel(
+                                    title: 'In Progress',
+                                    bgColor: status == 'In Progress'
+                                        ? HelperFunction().statusColor(
+                                            'In Progress',
+                                            'bg',
+                                          )
+                                        : AppColors.selectBg,
+                                    textColor: status == 'In Progress'
+                                        ? HelperFunction().statusColor(
+                                            'In Progress',
+                                            'text',
+                                          )
+                                        : AppColors.selectText,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: AppSizes.spaceBtwInputFields,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (isEdit) {
+                                      setState(() {
+                                        status = 'Closed';
+                                      });
+                                    }
+                                  },
+                                  child: PriorityLabel(
+                                    title: 'Closed',
+                                    bgColor: status == 'Closed'
+                                        ? HelperFunction().statusColor(
+                                            'Closed',
+                                            'bg',
+                                          )
+                                        : AppColors.selectBg,
+                                    textColor: status == 'Closed'
+                                        ? HelperFunction().statusColor(
+                                            'Closed',
+                                            'text',
+                                          )
+                                        : AppColors.selectText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: AppSizes.spaceBtwSections,
+                            ),
+// delete button
+                            OutlinedButton(
+                              onPressed: clickedDeleteButton,
+                              child: const Text('Delete Issue'),
+                            ),
+                            const SizedBox(
+                              height: AppSizes.spaceBtwInputFields,
+                            ),
+// edit button
+                            ElevatedButton(
+                              onPressed: () => clickedEditButton(
+                                _userModel.userId,
                               ),
+                              child: isSubmitLoading
+                                  ? const Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppColors.textWhite,
+                                      ),
+                                    )
+                                  : isEdit
+                                      ? const Text('Submit')
+                                      : const Text('Edit Issue'),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: AppSizes.spaceBtwInputFields,
-                      ),
-
-// priority level section
-                      Text(
-                        'Priority level:',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(
-                        height: AppSizes.sm,
-                      ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              if (isEdit) {
-                                setState(() {
-                                  priority = 'Low';
-                                });
-                              }
-                            },
-                            child: PriorityLabel(
-                              title: 'Low',
-                              bgColor: priority == 'Low'
-                                  ? HelperFunction().priorityColor(
-                                      'Low',
-                                      'bg',
-                                    )
-                                  : AppColors.selectBg,
-                              textColor: priority == 'Low'
-                                  ? HelperFunction().priorityColor(
-                                      'Low',
-                                      'text',
-                                    )
-                                  : AppColors.selectText,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: AppSizes.spaceBtwInputFields,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              if (isEdit) {
-                                setState(() {
-                                  priority = 'Medium';
-                                });
-                              }
-                            },
-                            child: PriorityLabel(
-                              title: 'Medium',
-                              bgColor: priority == 'Medium'
-                                  ? HelperFunction().priorityColor(
-                                      'Medium',
-                                      'bg',
-                                    )
-                                  : AppColors.selectBg,
-                              textColor: priority == 'Medium'
-                                  ? HelperFunction().priorityColor(
-                                      'Medium',
-                                      'text',
-                                    )
-                                  : AppColors.selectText,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: AppSizes.spaceBtwInputFields,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              if (isEdit) {
-                                setState(() {
-                                  priority = 'High';
-                                });
-                              }
-                            },
-                            child: PriorityLabel(
-                              title: 'High',
-                              bgColor: priority == 'High'
-                                  ? HelperFunction().priorityColor(
-                                      'High',
-                                      'bg',
-                                    )
-                                  : AppColors.selectBg,
-                              textColor: priority == 'High'
-                                  ? HelperFunction().priorityColor(
-                                      'High',
-                                      'text',
-                                    )
-                                  : AppColors.selectText,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: AppSizes.md,
-                      ),
-
-// status section
-                      Text(
-                        'Current status:',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(
-                        height: AppSizes.sm,
-                      ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              if (isEdit) {
-                                setState(() {
-                                  status = 'Open';
-                                });
-                              }
-                            },
-                            child: PriorityLabel(
-                              title: 'Open',
-                              bgColor: status == 'Open'
-                                  ? HelperFunction().statusColor(
-                                      'Open',
-                                      'bg',
-                                    )
-                                  : AppColors.selectBg,
-                              textColor: status == 'Open'
-                                  ? HelperFunction().statusColor(
-                                      'Open',
-                                      'text',
-                                    )
-                                  : AppColors.selectText,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: AppSizes.spaceBtwInputFields,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              if (isEdit) {
-                                setState(() {
-                                  status = 'In Progress';
-                                });
-                              }
-                            },
-                            child: PriorityLabel(
-                              title: 'In Progress',
-                              bgColor: status == 'In Progress'
-                                  ? HelperFunction().statusColor(
-                                      'In Progress',
-                                      'bg',
-                                    )
-                                  : AppColors.selectBg,
-                              textColor: status == 'In Progress'
-                                  ? HelperFunction().statusColor(
-                                      'In Progress',
-                                      'text',
-                                    )
-                                  : AppColors.selectText,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: AppSizes.spaceBtwInputFields,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              if (isEdit) {
-                                setState(() {
-                                  status = 'Closed';
-                                });
-                              }
-                            },
-                            child: PriorityLabel(
-                              title: 'Closed',
-                              bgColor: status == 'Closed'
-                                  ? HelperFunction().statusColor(
-                                      'Closed',
-                                      'bg',
-                                    )
-                                  : AppColors.selectBg,
-                              textColor: status == 'Closed'
-                                  ? HelperFunction().statusColor(
-                                      'Closed',
-                                      'text',
-                                    )
-                                  : AppColors.selectText,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: AppSizes.spaceBtwSections,
-                      ),
-// delete button
-                      OutlinedButton(
-                        onPressed: clickedDeleteButton,
-                        child: const Text('Delete Issue'),
-                      ),
-                      const SizedBox(
-                        height: AppSizes.spaceBtwInputFields,
-                      ),
-// edit button
-                      ElevatedButton(
-                        onPressed: () => clickedEditButton(
-                          _userModel.userId,
-                        ),
-                        child: isSubmitLoading
-                            ? const Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColors.textWhite,
-                                ),
-                              )
-                            : isEdit
-                                ? const Text('Submit')
-                                : const Text('Edit Issue'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                    ),
+                  );
+      }),
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:issues_tracker/helper/helper_function.dart';
 import 'package:issues_tracker/models/user_model.dart';
 import 'package:issues_tracker/providers/user_provider.dart';
 import 'package:issues_tracker/services/auth_methods.dart';
+import 'package:issues_tracker/services/issue_methods.dart';
 import 'package:issues_tracker/services/user_methods.dart';
 import 'package:issues_tracker/utils/constants/colors.dart';
 import 'package:issues_tracker/utils/constants/sizes.dart';
@@ -47,7 +48,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (response == 'Success') {
+      // if successfully profile picture added, then update user provider
       Provider.of<UserProvider>(context, listen: false).refreshUserDetails();
+      // update profile picture of the issue card
+      String response = await IssueMethods().updateProfileImage(
+        url: Provider.of<UserProvider>(context, listen: false)
+            .getUserProfilePicture,
+      );
+
+      if (response != 'Success') {
+        HelperFunction().showSnackBar(
+          context,
+          response,
+        );
+      }
     } else {
       HelperFunction().showSnackBar(
         context,
