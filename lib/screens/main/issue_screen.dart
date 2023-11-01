@@ -39,7 +39,6 @@ class _IssueScreenState extends State<IssueScreen> {
   String priority = '';
   String status = '';
   bool isLoading = false;
-  String selectedUser = '0';
   bool isSubmitLoading = false;
   bool isEdit = false;
 
@@ -66,7 +65,6 @@ class _IssueScreenState extends State<IssueScreen> {
       var response = await IssueMethods().getIssueData(
         issueId: widget.issueId,
       );
-      print(response);
 
       if (response != null) {
         setState(() {
@@ -90,7 +88,7 @@ class _IssueScreenState extends State<IssueScreen> {
     });
   }
 
-  void clickedEditButton(String uid) async {
+  void clickedEditButton() async {
     if (isEdit) {
       // validate text field before calling to the firebase
       if (_titleController.text.isNotEmpty) {
@@ -102,9 +100,8 @@ class _IssueScreenState extends State<IssueScreen> {
 
           String response = await IssueMethods().updateIssueData(
             issueId: widget.issueId,
-            ownerId: selectedUser == '0' ? uid : ownerId,
-            profileImage:
-                selectedUser == '0' ? profileImage : owner.userProfile,
+            ownerId: ownerId,
+            profileImage: owner.userProfile,
             title: _titleController.text,
             description: _descriptionController.text,
             priority: priority,
@@ -119,7 +116,8 @@ class _IssueScreenState extends State<IssueScreen> {
           Provider.of<StatusProvider>(context, listen: false)
               .initializedStatus();
 
-          if (selectedUser != '0') {
+          if (ownerId !=
+              Provider.of<UserProvider>(context, listen: false).getUserId) {
             Navigator.pop(context);
           }
 
@@ -268,10 +266,10 @@ class _IssueScreenState extends State<IssueScreen> {
                                             snapshot.data!.docs.toList();
 
 // first add current user data as a first value to list
-// assign current user value is '0' but other users value is their user id
+// assign current user and other users value is their user id
                                         usersList.add(
                                           DropdownMenuItem(
-                                            value: '0',
+                                            value: _userModel.userId,
                                             child: Row(
                                               children: [
 //  user profile picture
@@ -342,15 +340,14 @@ class _IssueScreenState extends State<IssueScreen> {
                                         child: IgnorePointer(
                                           ignoring: !isEdit,
                                           child: DropdownButton(
-                                            value: selectedUser,
+                                            value: ownerId,
                                             isExpanded: false,
                                             items: usersList,
                                             underline: const SizedBox(),
 // if user change assign user, this will change the drop down current value
                                             onChanged: (value) {
                                               setState(() {
-                                                selectedUser = value;
-                                                ownerId = selectedUser;
+                                                ownerId = value;
                                               });
                                             },
                                           ),
@@ -592,9 +589,7 @@ class _IssueScreenState extends State<IssueScreen> {
                             ),
 // edit button
                             ElevatedButton(
-                              onPressed: () => clickedEditButton(
-                                _userModel.userId,
-                              ),
+                              onPressed: clickedEditButton,
                               child: isSubmitLoading
                                   ? const Center(
                                       child: CircularProgressIndicator(

@@ -15,6 +15,8 @@ class UserProvider with ChangeNotifier {
 
   UserModel get getUser => _currentUserModel;
 
+  String get getUserId => _currentUserModel.userId;
+
   String get getUserProfilePicture => _currentUserModel.userProfile;
 
   Future<void> refreshUserDetails() async {

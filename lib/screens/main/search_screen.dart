@@ -44,6 +44,15 @@ class _SearchScreenState extends State<SearchScreen> {
     return shouldCloseApp;
   }
 
+  void sortDocumentsByDate(List documents, String name) {
+    return documents.sort((a, b) {
+      Timestamp dateA = a[name] as Timestamp;
+      Timestamp dateB = b[name] as Timestamp;
+
+      return dateB.compareTo(dateA);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var query = _fireStore.collection('issues');
@@ -90,10 +99,9 @@ class _SearchScreenState extends State<SearchScreen> {
                           Expanded(
                             child: FutureBuilder(
                               future: query
-                                  .where('ownerId',
-                                      isEqualTo: _userModel.userId)
                                   .where('title',
-                                      isEqualTo: _searchController.text)
+                                      isGreaterThanOrEqualTo:
+                                          _searchController.text)
                                   .get(),
                               builder: ((context, snapshot) {
                                 if (snapshot.connectionState ==
@@ -105,8 +113,18 @@ class _SearchScreenState extends State<SearchScreen> {
                                   );
                                 }
 
+                                // take a documents snapshot
+                                List<DocumentSnapshot> documents =
+                                    snapshot.data!.docs;
+                                // filter documents by ownerId
+                                var currentUserBasedIssue =
+                                    documents.where((element) {
+                                  return element['ownerId'] ==
+                                      _userModel.userId;
+                                }).toList();
+
                                 return ListView.builder(
-                                  itemCount: snapshot.data!.docs.length,
+                                  itemCount: currentUserBasedIssue.length,
                                   itemBuilder: (context, index) {
                                     return GestureDetector(
                                       onTap: () {
@@ -114,14 +132,16 @@ class _SearchScreenState extends State<SearchScreen> {
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
                                             builder: (context) => IssueScreen(
-                                              issueId: snapshot
-                                                  .data!.docs[index]['issueId'],
+                                              issueId:
+                                                  currentUserBasedIssue[index]
+                                                      ['issueId'],
                                             ),
                                           ),
                                         );
                                       },
                                       child: IssueCard(
-                                        snap: snapshot.data!.docs[index].data(),
+                                        snap:
+                                            currentUserBasedIssue[index].data(),
                                       ),
                                     );
                                   },
@@ -131,188 +151,213 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ],
                       )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
+                    : SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
 // filter section
-                          Text(
-                            'Filters',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          const SizedBox(
-                            height: AppSizes.defaultSpace,
-                          ),
+                            Text(
+                              'Filters',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(
+                              height: AppSizes.defaultSpace,
+                            ),
 
-// status filter section
-                          const Text(
-                            'Filter by status',
-                          ),
-                          Row(
-                            children: Constants.statusList
-                                .map((status) => Row(
+                            // status filter section
+                            const Text(
+                              'Filter by status',
+                            ),
+                            Row(
+                              children: Constants.statusList
+                                  .map((status) => Row(
+                                        children: [
+                                          FilterChip(
+                                            selected:
+                                                filterProvider.selectedStatus ==
+                                                    status,
+                                            onSelected: (value) {
+                                              if (value) {
+                                                filterProvider
+                                                    .updateStatus(status);
+                                              } else {
+                                                filterProvider.updateStatus('');
+                                              }
+                                            },
+                                            label: Text(
+                                              status,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: AppSizes.spaceBtwItems / 2,
+                                          ),
+                                        ],
+                                      ))
+                                  .toList(),
+                            ),
+                            const SizedBox(
+                              height: AppSizes.sm,
+                            ),
+
+                            // priority filter section
+                            const Text(
+                              'Filter by priority',
+                            ),
+                            Row(
+                              children: Constants.priorityList
+                                  .map(
+                                    (priority) => Row(
                                       children: [
                                         FilterChip(
                                           selected:
-                                              filterProvider.selectedStatus ==
-                                                  status,
+                                              filterProvider.selectedPriority ==
+                                                  priority,
                                           onSelected: (value) {
                                             if (value) {
                                               filterProvider
-                                                  .updateStatus(status);
+                                                  .updatePriority(priority);
                                             } else {
-                                              filterProvider.updateStatus('');
+                                              filterProvider.updatePriority('');
                                             }
                                           },
                                           label: Text(
-                                            status,
+                                            priority,
                                           ),
                                         ),
                                         const SizedBox(
                                           width: AppSizes.spaceBtwItems / 2,
                                         ),
                                       ],
-                                    ))
-                                .toList(),
-                          ),
-                          const SizedBox(
-                            height: AppSizes.sm,
-                          ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(
+                              height: AppSizes.spaceBtwSections,
+                            ),
 
-// priority filter section
-                          const Text(
-                            'Filter by priority',
-                          ),
-                          Row(
-                            children: Constants.priorityList
-                                .map(
-                                  (priority) => Row(
-                                    children: [
-                                      FilterChip(
-                                        selected:
-                                            filterProvider.selectedPriority ==
-                                                priority,
-                                        onSelected: (value) {
-                                          if (value) {
-                                            filterProvider
-                                                .updatePriority(priority);
-                                          } else {
-                                            filterProvider.updatePriority('');
-                                          }
-                                        },
-                                        label: Text(
-                                          priority,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: AppSizes.spaceBtwItems / 2,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                          const SizedBox(
-                            height: AppSizes.spaceBtwSections,
-                          ),
-
-// display all issues
-                          Text(
-                            'List of Issues',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          const SizedBox(
-                            height: AppSizes.defaultSpace,
-                          ),
+                            // display all issues section
+                            Text(
+                              'List of Issues',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(
+                              height: AppSizes.defaultSpace,
+                            ),
 
 // retrieve all issues from firebase
-                          Expanded(
-                            child: StreamBuilder(
-                              stream: filterProvider.selectedStatus != '' &&
-                                      filterProvider.selectedPriority != ''
-                                  ? query
-                                      .where(
-                                        'ownerId',
-                                        isEqualTo: _userModel.userId,
-                                      )
-                                      .where(
-                                        'status',
-                                        isEqualTo:
-                                            filterProvider.selectedStatus,
-                                      )
-                                      .where(
-                                        'priority',
-                                        isEqualTo:
-                                            filterProvider.selectedPriority,
-                                      )
-                                      .snapshots()
-                                  : filterProvider.selectedStatus != '' &&
-                                          filterProvider.selectedPriority == ''
-                                      ? query
-                                          .where(
-                                            'ownerId',
-                                            isEqualTo: _userModel.userId,
-                                          )
-                                          .where(
-                                            'status',
-                                            isEqualTo:
-                                                filterProvider.selectedStatus,
-                                          )
-                                          .snapshots()
-                                      : filterProvider.selectedStatus == '' &&
-                                              filterProvider.selectedPriority !=
-                                                  ''
-                                          ? query
-                                              .where(
-                                                'ownerId',
-                                                isEqualTo: _userModel.userId,
-                                              )
-                                              .where(
-                                                'priority',
-                                                isEqualTo: filterProvider
-                                                    .selectedPriority,
-                                              )
-                                              .snapshots()
-                                          : query
-                                              .where(
-                                                'ownerId',
-                                                isEqualTo: _userModel.userId,
-                                              )
-                                              .snapshots(),
-                              builder: ((context, snapshot) {
-                                if (snapshot.connectionState ==
-                                        ConnectionState.none ||
-                                    snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-
-                                return ListView.builder(
-                                  itemCount: snapshot.data!.docs.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onTap: () {
-// if user clicked on a issue card it will navigate to issue screen
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => IssueScreen(
-                                              issueId: snapshot
-                                                  .data!.docs[index]['issueId'],
-                                            ),
-                                          ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: StreamBuilder(
+                                    stream: filterProvider.selectedStatus !=
+                                                '' &&
+                                            filterProvider.selectedPriority !=
+                                                ''
+                                        ? query
+                                            .where(
+                                              'ownerId',
+                                              isEqualTo: _userModel.userId,
+                                            )
+                                            .where(
+                                              'status',
+                                              isEqualTo:
+                                                  filterProvider.selectedStatus,
+                                            )
+                                            .where(
+                                              'priority',
+                                              isEqualTo: filterProvider
+                                                  .selectedPriority,
+                                            )
+                                            .snapshots()
+                                        : filterProvider.selectedStatus != '' &&
+                                                filterProvider
+                                                        .selectedPriority ==
+                                                    ''
+                                            ? query
+                                                .where(
+                                                  'ownerId',
+                                                  isEqualTo: _userModel.userId,
+                                                )
+                                                .where(
+                                                  'status',
+                                                  isEqualTo: filterProvider
+                                                      .selectedStatus,
+                                                )
+                                                .snapshots()
+                                            : filterProvider.selectedStatus ==
+                                                        '' &&
+                                                    filterProvider
+                                                            .selectedPriority !=
+                                                        ''
+                                                ? query
+                                                    .where(
+                                                      'ownerId',
+                                                      isEqualTo:
+                                                          _userModel.userId,
+                                                    )
+                                                    .where(
+                                                      'priority',
+                                                      isEqualTo: filterProvider
+                                                          .selectedPriority,
+                                                    )
+                                                    .snapshots()
+                                                : query
+                                                    .where(
+                                                      'ownerId',
+                                                      isEqualTo:
+                                                          _userModel.userId,
+                                                    )
+                                                    .snapshots(),
+                                    builder: ((context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.none ||
+                                          snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
                                         );
-                                      },
-                                      child: IssueCard(
-                                        snap: snapshot.data!.docs[index].data(),
-                                      ),
-                                    );
-                                  },
-                                );
-                              }),
+                                      }
+
+// take a documents snapshot
+                                      List<DocumentSnapshot> documents =
+                                          snapshot.data!.docs;
+// Sort the documents based on the date
+// recent added issue document to last document
+                                      sortDocumentsByDate(
+                                          documents, 'postedDate');
+
+                                      return ListView.builder(
+                                        itemCount: documents.length,
+                                        shrinkWrap: true,
+                                        primary: false,
+                                        itemBuilder: (context, index) {
+                                          return GestureDetector(
+                                            onTap: () {
+// if user clicked on a issue card it will navigate to issue screen
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      IssueScreen(
+                                                    issueId: documents[index]
+                                                        ['issueId'],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: IssueCard(
+                                              snap: documents[index].data(),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
               ),
             ),

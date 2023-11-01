@@ -83,158 +83,160 @@ class _AddIssueState extends State<AddIssue> {
         builder: (context, networkProvider, child) {
       return networkProvider.connectivityResult == 'none'
           ? const NetworkScreen()
-          : Padding(
-              padding: const EdgeInsets.all(
-                AppSizes.defaultSpace,
-              ).copyWith(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: SizedBox(
-                height: 400.0,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(
+                  AppSizes.defaultSpace,
+                ).copyWith(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: SizedBox(
+                  height: 400.0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
 // form section
-                    Form(
-                      child: Column(
+                      Form(
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: _titleController,
+                              onChanged: (value) {
+                                setState(() {
+                                  errMessage = '';
+                                });
+                              },
+                              decoration: const InputDecoration(
+                                hintText: 'Title',
+                              ),
+                            ),
+                            const SizedBox(
+                              height: AppSizes.spaceBtwInputFields,
+                            ),
+                            TextField(
+                              controller: _descriptionController,
+                              maxLines: 5,
+                              onChanged: (value) {
+                                setState(() {
+                                  errMessage = '';
+                                });
+                              },
+                              decoration: const InputDecoration(
+                                hintText: 'Description',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: AppSizes.spaceBtwInputFields,
+                      ),
+                      // priority level section
+                      Row(
                         children: [
-                          TextField(
-                            controller: _titleController,
-                            onChanged: (value) {
+                          GestureDetector(
+                            onTap: () {
                               setState(() {
-                                errMessage = '';
+                                priority = 'Low';
                               });
                             },
-                            decoration: const InputDecoration(
-                              hintText: 'Title',
+                            child: PriorityLabel(
+                              title: 'Low',
+                              bgColor: priority == 'Low'
+                                  ? HelperFunction().priorityColor(
+                                      'Low',
+                                      'bg',
+                                    )
+                                  : AppColors.selectBg,
+                              textColor: priority == 'Low'
+                                  ? HelperFunction().priorityColor(
+                                      'Low',
+                                      'text',
+                                    )
+                                  : AppColors.selectText,
                             ),
                           ),
                           const SizedBox(
-                            height: AppSizes.spaceBtwInputFields,
+                            width: AppSizes.spaceBtwInputFields,
                           ),
-                          TextField(
-                            controller: _descriptionController,
-                            maxLines: 5,
-                            onChanged: (value) {
+                          GestureDetector(
+                            onTap: () {
                               setState(() {
-                                errMessage = '';
+                                priority = 'Medium';
                               });
                             },
-                            decoration: const InputDecoration(
-                              hintText: 'Description',
+                            child: PriorityLabel(
+                              title: 'Medium',
+                              bgColor: priority == 'Medium'
+                                  ? HelperFunction().priorityColor(
+                                      'Medium',
+                                      'bg',
+                                    )
+                                  : AppColors.selectBg,
+                              textColor: priority == 'Medium'
+                                  ? HelperFunction().priorityColor(
+                                      'Medium',
+                                      'text',
+                                    )
+                                  : AppColors.selectText,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: AppSizes.spaceBtwInputFields,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                priority = 'High';
+                              });
+                            },
+                            child: PriorityLabel(
+                              title: 'High',
+                              bgColor: priority == 'High'
+                                  ? HelperFunction().priorityColor(
+                                      'High',
+                                      'bg',
+                                    )
+                                  : AppColors.selectBg,
+                              textColor: priority == 'High'
+                                  ? HelperFunction().priorityColor(
+                                      'High',
+                                      'text',
+                                    )
+                                  : AppColors.selectText,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(
-                      height: AppSizes.spaceBtwInputFields,
-                    ),
-// priority level section
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              priority = 'Low';
-                            });
-                          },
-                          child: PriorityLabel(
-                            title: 'Low',
-                            bgColor: priority == 'Low'
-                                ? HelperFunction().priorityColor(
-                                    'Low',
-                                    'bg',
-                                  )
-                                : AppColors.selectBg,
-                            textColor: priority == 'Low'
-                                ? HelperFunction().priorityColor(
-                                    'Low',
-                                    'text',
-                                  )
-                                : AppColors.selectText,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: AppSizes.spaceBtwInputFields,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              priority = 'Medium';
-                            });
-                          },
-                          child: PriorityLabel(
-                            title: 'Medium',
-                            bgColor: priority == 'Medium'
-                                ? HelperFunction().priorityColor(
-                                    'Medium',
-                                    'bg',
-                                  )
-                                : AppColors.selectBg,
-                            textColor: priority == 'Medium'
-                                ? HelperFunction().priorityColor(
-                                    'Medium',
-                                    'text',
-                                  )
-                                : AppColors.selectText,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: AppSizes.spaceBtwInputFields,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              priority = 'High';
-                            });
-                          },
-                          child: PriorityLabel(
-                            title: 'High',
-                            bgColor: priority == 'High'
-                                ? HelperFunction().priorityColor(
-                                    'High',
-                                    'bg',
-                                  )
-                                : AppColors.selectBg,
-                            textColor: priority == 'High'
-                                ? HelperFunction().priorityColor(
-                                    'High',
-                                    'text',
-                                  )
-                                : AppColors.selectText,
-                          ),
-                        ),
-                      ],
-                    ),
-// error message display section
-                    errMessage != ''
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 10.0),
-                            child: Text(
-                              errMessage,
-                              style: const TextStyle(
-                                color: AppColors.error,
-                                fontSize: AppSizes.fontSizeXs,
-                              ),
-                            ),
-                          )
-                        : const SizedBox(),
-                    const SizedBox(
-                      height: AppSizes.spaceBtwSections,
-                    ),
-//data submitted button
-                    ElevatedButton(
-                      onPressed: createNewIssue,
-                      child: isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.textWhite,
+                      // error message display section
+                      errMessage != ''
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Text(
+                                errMessage,
+                                style: const TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: AppSizes.fontSizeXs,
+                                ),
                               ),
                             )
-                          : const Text('Create Issue'),
-                    ),
-                  ],
+                          : const SizedBox(),
+                      const SizedBox(
+                        height: AppSizes.spaceBtwSections,
+                      ),
+//data submitted button
+                      ElevatedButton(
+                        onPressed: createNewIssue,
+                        child: isLoading
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.textWhite,
+                                ),
+                              )
+                            : const Text('Create Issue'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

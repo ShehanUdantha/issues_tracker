@@ -99,9 +99,14 @@ class _IssueCardState extends State<IssueCard> {
                 ],
               ),
               // posted date
-              Text(
-                HelperFunction().formatDate(
-                  _issueModel.postedDate,
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 5.0),
+                  child: Text(
+                    HelperFunction().formatDate(
+                      _issueModel.postedDate,
+                    ),
+                  ),
                 ),
               ),
             ],
