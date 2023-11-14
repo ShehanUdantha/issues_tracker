@@ -4,7 +4,7 @@ This repository implements an issues-tracking mobile application using Flutter a
 
 ### Screenshots
 
-![Three iOS devices showing the default screen, an search screen, and the detail screen in issue](https://github.com/ShehanUdantha/issues_tracker/tree/main/assets/images/screenshot.png)
+![Three iOS devices showing the default screen, an search screen, and the detail screen in issue](https://github.com/ShehanUdantha/issues_tracker/blob/main/assets/images/screenshot.png)
 
 ## Getting Started
 
